@@ -3,8 +3,10 @@ module.exports = app => {
     const clientes = require("../controller/clientes.controller.js");
     var router = require("express").Router();
 
+    app.use("/api/clientes", router);
+
     router.post("/", clientes.create);
 
-    app.use("/api/clientes", router);
+    router.get("/", clientes.getAll);
 
 }
