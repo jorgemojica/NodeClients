@@ -11,4 +11,12 @@ module.exports = app => {
 
     router.get("/:id", clientes.findOne);
 
+    router.get('/estado/activo', clientes.findAllActive);
+
+    router.put("/:id", clientes.update);
+
+    router.delete("/:id", clientes.delete);
+
+    router.delete("/", clientes.deleteAll);
+
 }

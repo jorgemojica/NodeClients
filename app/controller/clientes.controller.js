@@ -1,5 +1,6 @@
 const model = require("../model");
 const Cliente = model.clientes;
+const Op = model.Sequelize.Op;
 
 exports.create = (req, res) => {
 
@@ -28,14 +29,18 @@ exports.create = (req, res) => {
 };
 
 exports.findAll = (req, res) => {
-    Cliente.findAll().then(data => {
-        res.send(data);
-    }).catch(err => {
-        res.status(500).send({
-            message:
-                err.message || "Algo salió mal"
+    const nombre = req.query.nombre;
+    var condicion = nombre ? { nombre: { [Op.iLike]: `%${nombre}%` } } : null;
+    Cliente.findAll({ where: condicion })
+        .then(data => {
+            res.send(data);
+        })
+        .catch(err => {
+            res.status(500).send({
+                message:
+                    err.message || "Algo salió mal"
+            });
         });
-    });
 };
 
 exports.findOne = (req, res) => {
@@ -54,4 +59,69 @@ exports.findOne = (req, res) => {
                 err.message || "Algo salió mal"
         });
     });
+}
+
+exports.findAllActive = (req, res) => {
+    Cliente.findAll({ where: { estado: true } })
+        .then(data => {
+            res.send(data);
+        }).catch(err => {
+            res.status(500).send({
+                message:
+                    err.message || "Algo salió mal"
+            });
+        });
 };
+
+exports.update = (req, res) => {
+    const id = req.params.id;
+    Cliente.update(req.body, { where: { id: id } }).then(num => {
+        if (num == 1) {
+            res.send({
+                message: "Cliente actualizado correctamente"
+            });
+        } else {
+            res.send({
+                message: `No se pudo actualizar el cliente con el id: ${id}`
+            });
+        }
+    }).catch(err => {
+        res.status(500).send({
+            message: err.message || "Algo salió mal"
+        });
+    });
+}
+
+exports.delete = (req, res) => {
+    const id = req.params.id;
+    Cliente.destroy({ where: { id: id } }).then(num => {
+        if (num == 1) {
+            res.send({
+                message: "Cliente eliminado correctamente"
+            });
+        } else {
+            res.send({
+                message: `No se pudo eliminar el cliente con el id: ${id}`
+            });
+        }
+    }).catch(err => {
+        res.status(500).send({
+            message: err.message || "Algo salió mal"
+        });
+    });
+}
+
+exports.deleteAll = (req, res) => {
+    Cliente.destroy({
+        where: {},
+        truncate: false
+    }).then(nums => {
+        res.send({
+            message: `Se eliminaron ${nums} clientes`
+        });
+    }).catch(err => {
+        res.status(500).send({
+            message: err.message || "Algo salió mal"
+        });
+    });
+}
